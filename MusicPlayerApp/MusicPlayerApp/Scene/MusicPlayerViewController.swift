@@ -9,6 +9,10 @@ import UIKit
 import Hex
 
 class MusicPlayerViewController: UIViewController {
+    private var totalTime = 75.0
+    private var currentTime = 0.0
+    private var inProgress = false
+    
     //MARK: - UI Components
     private let songCoverImageView: UIImageView = {
         let imageView = UIImageView()
@@ -50,7 +54,6 @@ class MusicPlayerViewController: UIViewController {
     private let progressStartLabel: UILabel = {
         let label = UILabel()
         label.textColor = UIColor.init(hex: "#F2F2F2")
-        label.text = "1:25"
         label.font = UIFont.boldSystemFont(ofSize: 14)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -59,7 +62,6 @@ class MusicPlayerViewController: UIViewController {
     private let progressEndLabel: UILabel = {
         let label = UILabel()
         label.textColor = UIColor.init(hex: "#F2F2F2")
-        label.text = "3:15"
         label.font = UIFont.boldSystemFont(ofSize: 14)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -170,6 +172,8 @@ class MusicPlayerViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         homeButtonTapped()
+        addProgressViewFunctionality()
+        addDynamicTime()
     }
     
     
@@ -219,7 +223,6 @@ class MusicPlayerViewController: UIViewController {
     
     private func addProgressView() {
         progressView.translatesAutoresizingMaskIntoConstraints = false
-        progressView.setProgress(0.3, animated: true)
         
         view.addSubview(progressView)
         
@@ -241,6 +244,11 @@ class MusicPlayerViewController: UIViewController {
             progressEndLabel.topAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 5)
             
         ])
+    }
+    
+    private func addDynamicTime() {
+        progressEndLabel.text = formatToString(enter: totalTime)
+        progressStartLabel.text = formatToString(enter: currentTime)
     }
     
     private func addButtons() {
@@ -292,9 +300,9 @@ class MusicPlayerViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             playStopButton.centerXAnchor.constraint(equalTo: playStopBackgroundImageView.centerXAnchor),
-            playStopButton.topAnchor.constraint(equalTo: progressStartLabel.bottomAnchor, constant: 58),
-            playStopButton.widthAnchor.constraint(equalToConstant: 24),
-            playStopButton.heightAnchor.constraint(equalToConstant: 24)
+            playStopButton.centerYAnchor.constraint(equalTo: playStopBackgroundImageView.centerYAnchor),
+            playStopButton.widthAnchor.constraint(equalToConstant: 41),
+            playStopButton.heightAnchor.constraint(equalToConstant: 41)
         ])
     }
     
@@ -420,5 +428,45 @@ class MusicPlayerViewController: UIViewController {
         }
     }
     
+    private func addProgressViewFunctionality() {
+        playStopButton.addAction(UIAction.init(handler: { [weak self] _ in
+            self?.progressBar()
+        }), for: .touchUpInside)
+    }
+    
+    private func progressBar() {
+        if !inProgress {
+            playStopButton.setImage(UIImage(named: "pause"), for: .normal)
+            inProgress = true
+            setupProgress()
+        } else {
+            playStopButton.setImage(UIImage(named: "play"), for: .normal)
+            inProgress = false
+        }
+    }
+    
+    private func setupProgress() {
+        currentTime += 0.005
+        let progress = Float(currentTime / totalTime)
+        UIView.animate(withDuration: 0.02){
+            self.progressView.setProgress(progress, animated: true)
+        }
+    
+        if currentTime < totalTime && inProgress == true {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.005) { [weak self] in
+                self?.setupProgress()
+                self!.progressEndLabel.text = self?.formatToString(enter: self!.totalTime - self!.currentTime + 1)
+                self!.progressStartLabel.text = self?.formatToString(enter: self!.currentTime)
+            }
+        }
+    }
+    
+    
+    private func formatToString(enter time: Double) -> String {
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+
 }
 
