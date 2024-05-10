@@ -15,21 +15,18 @@ class MusicPlayerViewController: UIViewController {
     private var imageLeadingConstraint: NSLayoutConstraint?
     private var imageTrailingConstraint: NSLayoutConstraint?
     
-
-    
     //MARK: - UI Components
-    private let activityIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .large)
-        indicator.color = .gray
-        indicator.hidesWhenStopped = true
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
-    }()
-
     private let songCoverImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.image = UIImage(named: "SongCover")
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+
+    private let loaderImage: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
@@ -186,7 +183,6 @@ class MusicPlayerViewController: UIViewController {
         homeButtonTapped()
         addProgressViewFunctionality()
         addDynamicTime()
-        addLoaderIndicator()
     }
     
     
@@ -194,6 +190,7 @@ class MusicPlayerViewController: UIViewController {
     private func setupUI() {
         addBackgroundColor()
         addImageViewToView()
+        addLoaderIndicator()
         addSongNameStackView()
         addSongLabelsToStackView()
         addProgressView()
@@ -222,12 +219,14 @@ class MusicPlayerViewController: UIViewController {
     }
     
     private func addLoaderIndicator() {
-        view.addSubview(activityIndicator)
-        
+        view.addSubview(loaderImage)
         NSLayoutConstraint.activate([
-            activityIndicator.topAnchor.constraint(equalTo: songCoverImageView.bottomAnchor, constant: -25),
-            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            loaderImage.topAnchor.constraint(equalTo: songCoverImageView.bottomAnchor, constant: -25),
+            loaderImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loaderImage.widthAnchor.constraint(equalToConstant: 50),
+            loaderImage.heightAnchor.constraint(equalToConstant: 50)
         ])
+        
     }
     
     private func addSongNameStackView() {
@@ -482,9 +481,9 @@ class MusicPlayerViewController: UIViewController {
     
     private func continueButtonLogic() {
         UIView.animate(withDuration: 0.5) { [weak self] in
-            self?.activityIndicator.startAnimating()
+            self?.startAnimation()
             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                self?.activityIndicator.stopAnimating()
+                self?.stopAnimation()
                 self?.setupProgress()
                 self?.imageLeadingConstraint?.constant = 35
                 self?.imageTrailingConstraint?.constant = -35
@@ -517,6 +516,21 @@ class MusicPlayerViewController: UIViewController {
         return String(format: "%d:%02d", minutes, seconds)
     }
 
+    
+    private func startAnimation() {
+        let rotation = CABasicAnimation(keyPath: "transform.rotation")
+        rotation.fromValue = 0
+        rotation.toValue = 2 * Double.pi
+        rotation.duration = 1.0
+        rotation.repeatCount = .infinity
+        loaderImage.image = UIImage(named: "loader")
+        loaderImage.layer.add(rotation, forKey: "spin")
+    }
+    
+    private func stopAnimation() {
+        loaderImage.layer.removeAllAnimations()
+        loaderImage.image = UIImage()
+    }
     
 }
 
