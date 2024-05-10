@@ -126,7 +126,7 @@ class MusicPlayerViewController: UIViewController {
     
     private let navView: UIView = {
         let view = UIView()
-        view.frame = CGRect(x: 20, y: 20, width: UIScreen.main.bounds.width-40, height: 100)
+        view.frame = CGRect(x: 20, y: 20, width: UIScreen.main.bounds.width-40, height: 130)
         view.roundCorners(corners: [.topLeft, .topRight], radius: 40)
         view.backgroundColor = UIColor.init(hex: "#0A091E")
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -197,8 +197,8 @@ class MusicPlayerViewController: UIViewController {
         NSLayoutConstraint.activate([
             songCoverImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 35),
             songCoverImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -35),
-            songCoverImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 110),
-            songCoverImageView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.3)
+            songCoverImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: UIScreen.main.bounds.height * 0.12),
+            songCoverImageView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.38)
         ])
     }
     
@@ -236,9 +236,9 @@ class MusicPlayerViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             progressStartLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            progressStartLabel.topAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 1),
+            progressStartLabel.topAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 5),
             progressEndLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            progressEndLabel.topAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 1)
+            progressEndLabel.topAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 5)
             
         ])
     }
@@ -328,7 +328,7 @@ class MusicPlayerViewController: UIViewController {
             navView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             navView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             navView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            navView.heightAnchor.constraint(equalToConstant: 85)
+            navView.heightAnchor.constraint(equalToConstant: UIScreen.main.bounds.height * 0.1)
         ])
     }
     
@@ -370,6 +370,15 @@ class MusicPlayerViewController: UIViewController {
             self?.deactivateOldAndActivateNewIcon(on: self!.homeNavItemButton)
         }), for: .touchUpInside)
         
+        musicNavItemButton.addAction(UIAction.init(handler: { [weak self] _ in
+            self?.deactivateOldAndActivateNewIcon(on: self!.musicNavItemButton)
+        }), for: .touchUpInside)
+        
+        favoritesNavItemButton.addAction(UIAction.init(handler: { [weak self] _ in
+            self?.deactivateOldAndActivateNewIcon(on: self!.favoritesNavItemButton)
+        }), for: .touchUpInside)
+        
+        
     }
     private func deactivateOldAndActivateNewIcon(on button: UIButton) {
         changeButtonColorToGray()
@@ -377,16 +386,38 @@ class MusicPlayerViewController: UIViewController {
     }
     
     private func activateIcon(on button: UIButton) {
+        increaseSize(on: button)
         
         UIView.animate(withDuration: 0.3) {
             button.tintColor = .systemBlue
+            self.view.layoutIfNeeded()
         }
     }
     
+    private func increaseSize(on button: UIButton) {
+        let currentImage = button.currentImage
+        let currentConfiguration = UIImage.SymbolConfiguration(pointSize: 40)
+        let newImage = currentImage!.withConfiguration(currentConfiguration)
+        button.setImage(newImage, for: .normal)
+    }
+    private func decreaseSize(on button: UIButton) {
+        let currentImage = button.currentImage
+        let currentConfiguration = UIImage.SymbolConfiguration(pointSize: 24)
+        let newImage = currentImage!.withConfiguration(currentConfiguration)
+        button.setImage(newImage, for: .normal)
+    }
+    
     private func changeButtonColorToGray() {
-        homeNavItemButton.tintColor = .lightGray
-        musicNavItemButton.tintColor = .lightGray
-        favoritesNavItemButton.tintColor = .lightGray
+        self.decreaseSize(on: homeNavItemButton)
+        self.decreaseSize(on: musicNavItemButton)
+        self.decreaseSize(on: favoritesNavItemButton)
+        
+        UIView.animate(withDuration: 0.3) {
+            self.homeNavItemButton.tintColor = .lightGray
+            self.musicNavItemButton.tintColor = .lightGray
+            self.favoritesNavItemButton.tintColor = .lightGray
+            self.view.layoutIfNeeded()
+        }
     }
     
 }
