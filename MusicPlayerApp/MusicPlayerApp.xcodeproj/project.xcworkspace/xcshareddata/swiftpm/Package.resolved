@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "hex",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/toddheasley/hex",
+      "state" : {
+        "revision" : "eb202bd45ad4986bd29a0e6ff6bdb4f28325b6e9",
+        "version" : "1.0.0"
+      }
+    }
+  ],
+  "version" : 2
+}
