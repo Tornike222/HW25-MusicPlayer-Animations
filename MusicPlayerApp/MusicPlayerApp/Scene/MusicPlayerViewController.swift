@@ -12,8 +12,20 @@ class MusicPlayerViewController: UIViewController {
     private var totalTime = 75.0
     private var currentTime = 0.0
     private var inProgress = false
+    private var imageLeadingConstraint: NSLayoutConstraint?
+    private var imageTrailingConstraint: NSLayoutConstraint?
+    
+
     
     //MARK: - UI Components
+    private let activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .gray
+        indicator.hidesWhenStopped = true
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
+    }()
+
     private let songCoverImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
@@ -174,6 +186,7 @@ class MusicPlayerViewController: UIViewController {
         homeButtonTapped()
         addProgressViewFunctionality()
         addDynamicTime()
+        addLoaderIndicator()
     }
     
     
@@ -198,11 +211,22 @@ class MusicPlayerViewController: UIViewController {
     private func addImageViewToView() {
         view.addSubview(songCoverImageView)
         
+        imageLeadingConstraint = songCoverImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 35)
+        imageTrailingConstraint = songCoverImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -35)
+        imageLeadingConstraint?.isActive = true
+        imageTrailingConstraint?.isActive = true
         NSLayoutConstraint.activate([
-            songCoverImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 35),
-            songCoverImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -35),
             songCoverImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: UIScreen.main.bounds.height * 0.12),
             songCoverImageView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.38)
+        ])
+    }
+    
+    private func addLoaderIndicator() {
+        view.addSubview(activityIndicator)
+        
+        NSLayoutConstraint.activate([
+            activityIndicator.topAnchor.constraint(equalTo: songCoverImageView.bottomAnchor, constant: -25),
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
     
@@ -438,10 +462,36 @@ class MusicPlayerViewController: UIViewController {
         if !inProgress {
             playStopButton.setImage(UIImage(named: "pause"), for: .normal)
             inProgress = true
-            setupProgress()
+            if currentTime > 0 { // პირველი გაშვების დასაჰენდლად რომ არ ჩაიტვირთოს ლოადერი
+                continueButtonLogic()
+            } else {
+                setupProgress()
+            }
+            
         } else {
             playStopButton.setImage(UIImage(named: "play"), for: .normal)
             inProgress = false
+            imageLeadingConstraint?.constant = 85
+            imageTrailingConstraint?.constant = -85
+            UIView.animate(withDuration: 0.5) { [weak self] in
+                self?.view.layoutIfNeeded()
+            }
+
+        }
+    }
+    
+    private func continueButtonLogic() {
+        UIView.animate(withDuration: 0.5) { [weak self] in
+            self?.activityIndicator.startAnimating()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                self?.activityIndicator.stopAnimating()
+                self?.setupProgress()
+                self?.imageLeadingConstraint?.constant = 35
+                self?.imageTrailingConstraint?.constant = -35
+                UIView.animate(withDuration: 0.5) {
+                    self?.view.layoutIfNeeded()
+                }
+            }
         }
     }
     
@@ -461,12 +511,12 @@ class MusicPlayerViewController: UIViewController {
         }
     }
     
-    
     private func formatToString(enter time: Double) -> String {
         let minutes = Int(time) / 60
         let seconds = Int(time) % 60
         return String(format: "%d:%02d", minutes, seconds)
     }
 
+    
 }
 
