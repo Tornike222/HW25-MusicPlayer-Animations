@@ -105,11 +105,19 @@
 		B2686DAB2BEDEB2800D663C5 /* Scene */ = {
 			isa = PBXGroup;
 			children = (
+				B2686DB32BEEFE0100D663C5 /* MusicPlayerMainPage */,
+			);
+			path = Scene;
+			sourceTree = "<group>";
+		};
+		B2686DB32BEEFE0100D663C5 /* MusicPlayerMainPage */ = {
+			isa = PBXGroup;
+			children = (
 				B2686DB12BEEC74700D663C5 /* MusicPlayerView.swift */,
 				B2686D942BED61AA00D663C5 /* MusicPlayerViewController.swift */,
 				B2686DAC2BEE443000D663C5 /* MusicPlayerViewModel.swift */,
 			);
-			path = Scene;
+			path = MusicPlayerMainPage;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

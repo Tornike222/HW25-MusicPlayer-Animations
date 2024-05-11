@@ -9,12 +9,13 @@ import UIKit
 import Hex
 
 final class MusicPlayerViewController: UIViewController {
-    private var musicPlayerView = MusicPlayerView()
+    private var musicPlayerView: MusicPlayerView!
     private var viewModel: MusicPlayerViewModel!
     
     //MARK: - Lifecycle
-    init(viewModel: MusicPlayerViewModel){
+    init(viewModel: MusicPlayerViewModel, musicPlayerView: MusicPlayerView ){
         self.viewModel = viewModel
+        self.musicPlayerView = musicPlayerView
         super.init(nibName: nil, bundle: nil)
     }
     
