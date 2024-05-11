@@ -12,7 +12,6 @@ final class MusicPlayerViewController: UIViewController {
     private var musicPlayerView = MusicPlayerView()
     private var viewModel: MusicPlayerViewModel!
     
-    
     //MARK: - Lifecycle
     init(viewModel: MusicPlayerViewModel){
         self.viewModel = viewModel
@@ -29,7 +28,11 @@ final class MusicPlayerViewController: UIViewController {
         homeButtonTapped()
         addProgressViewFunctionality()
         addDynamicTime()
+        addDefaultActivatedIcon()
+        viewModel.delegate = self
+        
     }
+    
     
     //MARK: - Add view to ViewController
     private func addMusicPlayerViewToView() {
@@ -42,12 +45,8 @@ final class MusicPlayerViewController: UIViewController {
             musicPlayerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-    //MARK: - Functions of main functionality
-    private func addDynamicTime() {
-        musicPlayerView.progressEndLabel.text = viewModel.formatToString(enter: viewModel.totalTime)
-        musicPlayerView.progressStartLabel.text = viewModel.formatToString(enter: viewModel.currentTime)
-    }
     
+    //MARK: - Bottom navigation view functionality
     private func homeButtonTapped() {
         let navButton = [musicPlayerView.homeNavItemButton, 
                          musicPlayerView.musicNavItemButton,
@@ -58,6 +57,11 @@ final class MusicPlayerViewController: UIViewController {
                 self?.deactivateOldAndActivateNewIcon(on: button)
             }), for: .touchUpInside)
         }
+    }
+    
+    private func addDefaultActivatedIcon() {
+        musicPlayerView.musicNavItemButton.tintColor = .systemBlue
+        changeSize(on: musicPlayerView.musicNavItemButton, to: 40)
     }
     
     private func deactivateOldAndActivateNewIcon(on button: UIButton) {
@@ -94,40 +98,24 @@ final class MusicPlayerViewController: UIViewController {
         button.setImage(newImage, for: .normal)
     }
     
+    //MARK: - Pause Continue Functionality with progress bar
+    private func addDynamicTime() {
+        musicPlayerView.progressEndLabel.text = viewModel.formatToString(enter: viewModel.totalTime)
+        musicPlayerView.progressStartLabel.text = viewModel.formatToString(enter: viewModel.currentTime)
+    }
+    
     private func addProgressViewFunctionality() {
         musicPlayerView.playStopButton.addAction(UIAction.init(handler: { [weak self] _ in
-            self?.progressBar()
+            self?.viewModel.progressBar()
         }), for: .touchUpInside)
     }
     
-    private func progressBar() {
-        if !viewModel.inProgress {
-            musicPlayerView.playStopButton.setImage(UIImage(named: "pause"), for: .normal)
-            viewModel.inProgress = true
-            if viewModel.currentTime > 0 { // პირველი გაშვების დასაჰენდლად რომ არ ჩაიტვირთოს ლოადერი
-                continueButtonLogic()
-            } else {
-                setupProgress()
-            }
-            
-        } else {
-            musicPlayerView.playStopButton.setImage(UIImage(named: "play"), for: .normal)
-            viewModel.inProgress = false
-            musicPlayerView.imageLeadingConstraint?.constant = 85
-            musicPlayerView.imageTrailingConstraint?.constant = -85
-            UIView.animate(withDuration: 0.5) { [weak self] in
-                self?.view.layoutIfNeeded()
-            }
-
-        }
-    }
-    
-    private func continueButtonLogic() {
+    func continueButtonLogic() {
         UIView.animate(withDuration: 0.5) { [weak self] in
             self?.startAnimation()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 self?.stopAnimation()
-                self?.setupProgress()
+                self?.viewModel.setupProgress()
                 self?.musicPlayerView.imageLeadingConstraint?.constant = 35
                 self?.musicPlayerView.imageTrailingConstraint?.constant = -35
                 UIView.animate(withDuration: 0.5) {
@@ -137,22 +125,6 @@ final class MusicPlayerViewController: UIViewController {
         }
     }
     
-    private func setupProgress() {
-        viewModel.currentTime += 0.005
-        let progress = Float(viewModel.currentTime / viewModel.totalTime)
-        UIView.animate(withDuration: 0.02) {
-            self.musicPlayerView.progressView.setProgress(progress, animated: true)
-        }
-    
-        if viewModel.currentTime < viewModel.totalTime && viewModel.inProgress {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.005) { [weak self] in
-                self?.setupProgress()
-                self!.musicPlayerView.progressEndLabel.text = self?.viewModel.formatToString(enter: self!.viewModel.totalTime - self!.viewModel.currentTime + 1)
-                self!.musicPlayerView.progressStartLabel.text = self?.viewModel.formatToString(enter: self!.viewModel.currentTime)
-            }
-        }
-    }
-
     private func startAnimation() {
         let rotation = CABasicAnimation(keyPath: "transform.rotation")
         rotation.fromValue = 0
@@ -168,5 +140,32 @@ final class MusicPlayerViewController: UIViewController {
         musicPlayerView.loaderImage.image = UIImage()
     }
     
+}
+
+//MARK: - MusicPlayerViewModelDelegate Extension
+extension MusicPlayerViewController: MusicPlayerViewModelDelegate {
+    func setPauseImage() {
+        musicPlayerView.playStopButton.setImage(UIImage(named: "pause"), for: .normal)
+    }
+    
+    func updateTextLabels(progressStartTime: Double, progressEndTime: Double) {
+        self.musicPlayerView.progressEndLabel.text = self.viewModel.formatToString(enter: progressEndTime)
+        self.musicPlayerView.progressStartLabel.text = self.viewModel.formatToString(enter: progressStartTime)
+    }
+    
+    func setProgress(progress: Float) {
+        UIView.animate(withDuration: 0.02) {
+            self.musicPlayerView.progressView.setProgress(progress, animated: true)
+        }
+    }
+    
+    func setPlayIconAndIncreaseImageSize() {
+        musicPlayerView.playStopButton.setImage(UIImage(named: "play"), for: .normal)
+        musicPlayerView.imageLeadingConstraint?.constant = 85
+        musicPlayerView.imageTrailingConstraint?.constant = -85
+        UIView.animate(withDuration: 0.5) { [weak self] in
+            self?.view.layoutIfNeeded()
+        }
+    }
 }
 

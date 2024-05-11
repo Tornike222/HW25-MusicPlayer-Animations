@@ -26,7 +26,7 @@ class MusicPlayerView: UIView {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
-
+    
     let loaderImage: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
@@ -163,7 +163,7 @@ class MusicPlayerView: UIView {
         return button
     }()
     
-     let musicNavItemButton: UIButton = {
+    let musicNavItemButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "music.quarternote.3", withConfiguration: UIImage.SymbolConfiguration(pointSize: 24)), for: .normal)
         button.layer.cornerRadius = 8
@@ -173,7 +173,7 @@ class MusicPlayerView: UIView {
         return button
     }()
     
-     let favoritesNavItemButton: UIButton = {
+    let favoritesNavItemButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "heart", withConfiguration: UIImage.SymbolConfiguration(pointSize: 24)), for: .normal)
         button.layer.cornerRadius = 8
@@ -391,7 +391,7 @@ class MusicPlayerView: UIView {
             homeNavItemButton.centerXAnchor.constraint(equalTo: navView.leadingAnchor, constant: navView.bounds.width / 6)
         ])
     }
-
+    
     private func addMusicButton() {
         contentView.addSubview(musicNavItemButton)
         
@@ -400,7 +400,7 @@ class MusicPlayerView: UIView {
             musicNavItemButton.centerXAnchor.constraint(equalTo: navView.centerXAnchor)
         ])
     }
-
+    
     private func addFavoritesButton() {
         contentView.addSubview(favoritesNavItemButton)
         
@@ -409,5 +409,4 @@ class MusicPlayerView: UIView {
             favoritesNavItemButton.centerXAnchor.constraint(equalTo: navView.trailingAnchor, constant: -navView.bounds.width / 6)
         ])
     }
-
 }
